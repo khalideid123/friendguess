@@ -1,0 +1,128 @@
+.no-account {
+  margin: -4px 0 22px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(63, 81, 181, 0.08);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.select-input {
+  appearance: none;
+  cursor: pointer;
+}
+
+.error-box {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #ffe8e8;
+  border: 1px solid #f5a5a5;
+  color: #9b1c1c;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.inline-error {
+  margin: 12px 16px 0;
+}
+
+.waiting-banner {
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(69, 91, 255, 0.08);
+  font-weight: 800;
+  text-align: center;
+}
+
+.loading-screen {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: linear-gradient(135deg, #5b66f4, #8b5cf6 55%, #ec4899);
+}
+
+.loader-card {
+  padding: 22px 28px;
+  border-radius: 18px;
+  background: white;
+  box-shadow: 0 18px 60px rgba(30, 20, 70, 0.25);
+  font-weight: 900;
+  color: #32345a;
+}
+
+.bg-orb {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(4px);
+  opacity: 0.35;
+}
+
+.orb-a {
+  width: 240px;
+  height: 240px;
+  left: -80px;
+  top: 12%;
+  background: #65d7ff;
+}
+
+.orb-b {
+  width: 300px;
+  height: 300px;
+  right: -100px;
+  bottom: 6%;
+  background: #ff77c8;
+}
+
+.pulse-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.pulse-dots span {
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #665df5;
+  animation: friendguessPulse 1.2s infinite ease-in-out;
+}
+
+.pulse-dots span:nth-child(2) { animation-delay: 0.15s; }
+.pulse-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes friendguessPulse {
+  0%, 80%, 100% { transform: scale(0.7); opacity: 0.4; }
+  40% { transform: scale(1.15); opacity: 1; }
+}
+
+.timer-danger {
+  animation: timerPulse 0.7s infinite alternate;
+}
+
+@keyframes timerPulse {
+  from { transform: scale(1); }
+  to { transform: scale(1.08); }
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+@media (max-width: 720px) {
+  .game-topbar {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .round-info,
+  .timer,
+  .room-pill {
+    font-size: 0.82rem;
+  }
+}
