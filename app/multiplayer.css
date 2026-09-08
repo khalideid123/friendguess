@@ -109,6 +109,35 @@
   to { transform: scale(1.08); }
 }
 
+.sound-toggle {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1000;
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  border-radius: 16px;
+  background: rgba(31, 35, 70, 0.82);
+  box-shadow: 0 10px 30px rgba(23, 24, 60, 0.28);
+  backdrop-filter: blur(12px);
+  color: white;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.sound-toggle:hover {
+  transform: translateY(-2px) scale(1.04);
+  background: rgba(62, 66, 126, 0.92);
+}
+
+.sound-toggle:active {
+  transform: scale(0.96);
+}
+
 button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
@@ -124,5 +153,13 @@ button:disabled {
   .timer,
   .room-pill {
     font-size: 0.82rem;
+  }
+
+  .sound-toggle {
+    right: 12px;
+    bottom: 12px;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
   }
 }
