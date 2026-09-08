@@ -18,6 +18,15 @@ export default function KickManager() {
       document.querySelectorAll(".fg-kick-button").forEach((button) => button.remove());
     }
 
+    function exitKickedPlayer() {
+      window.sessionStorage.removeItem("friendguess-active-room-id");
+      window.sessionStorage.setItem(
+        "friendguess-kicked-message",
+        "You were kicked from the room. You can still join again with the room code."
+      );
+      window.location.href = `${window.location.origin}${window.location.pathname}`;
+    }
+
     async function syncKickControls() {
       if (cancelled || busy) return;
 
@@ -43,15 +52,19 @@ export default function KickManager() {
       if (error) {
         const message = error?.message || "";
         if (message.includes("Player session is not valid") || message.includes("Room not found")) {
-          window.sessionStorage.removeItem("friendguess-active-room-id");
-          window.sessionStorage.setItem("friendguess-kicked-message", "You were removed from the FriendGuess room.");
-          window.location.reload();
+          exitKickedPlayer();
         }
         return;
       }
 
       const room = data?.room;
       const players = Array.isArray(data?.players) ? data.players : [];
+      const meStillInRoom = players.some((player) => player.user_id === playerId);
+
+      if (!meStillInRoom) {
+        exitKickedPlayer();
+        return;
+      }
 
       if (!room || room.host_user_id !== playerId) {
         removeKickButtons();
@@ -128,7 +141,7 @@ export default function KickManager() {
 
     observer.observe(document.body, { childList: true, subtree: true });
     syncKickControls();
-    const interval = window.setInterval(syncKickControls, 1000);
+    const interval = window.setInterval(syncKickControls, 650);
 
     return () => {
       cancelled = true;
