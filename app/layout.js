@@ -1,5 +1,6 @@
 import "./globals.css";
 import "./multiplayer.css";
+import SoundEffects from "../components/SoundEffects";
 
 export const metadata = {
   title: "FriendGuess",
@@ -9,7 +10,10 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <SoundEffects />
+      </body>
     </html>
   );
 }
