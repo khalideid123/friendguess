@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./multiplayer.css";
 
 export const metadata = {
   title: "FriendGuess",
