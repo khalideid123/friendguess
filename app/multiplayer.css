@@ -192,8 +192,30 @@
   box-shadow: 0 0 0 3px rgba(102, 93, 245, 0.12);
 }
 
-.feed-line.close,
-.feed-line.guess:has-text("CLOSE!") {
+.fg-kick-button {
+  margin-left: auto;
+  padding: 6px 10px;
+  border: 1px solid rgba(190, 35, 35, 0.2);
+  border-radius: 9px;
+  background: #fff0f0;
+  color: #a51f1f;
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.fg-kick-button:hover {
+  background: #ffdede;
+  transform: translateY(-1px);
+}
+
+.player-tile .fg-kick-button {
+  margin: 8px auto 0;
+}
+
+.feed-line.close {
   font-weight: 800;
 }
 
@@ -224,5 +246,10 @@ button:disabled {
 
   .fg-hint-control {
     padding: 10px 12px;
+  }
+
+  .fg-kick-button {
+    padding: 5px 8px;
+    font-size: 0.72rem;
   }
 }
