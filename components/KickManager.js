@@ -22,7 +22,7 @@ export default function KickManager() {
       window.sessionStorage.removeItem("friendguess-active-room-id");
       window.sessionStorage.setItem(
         "friendguess-kicked-message",
-        "You were kicked from the room. You can still join again with the room code."
+        "You were kicked from the room."
       );
       window.location.href = `${window.location.origin}${window.location.pathname}`;
     }
