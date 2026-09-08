@@ -29,22 +29,25 @@ const QUESTIONS = [
 const AVATARS = ["😎", "🦊", "🐸", "🐼", "🐯", "🐵", "🐧", "🐙", "🦁", "🐨"];
 
 function formatError(error) {
-  const message = error?.message || "Something went wrong.";
-  if (message.toLowerCase().includes("anonymous") && message.toLowerCase().includes("disabled")) {
-    return "Anonymous play is not enabled in Supabase yet.";
-  }
-  return message;
+  return error?.message || "Something went wrong.";
+}
+
+function makeSecret() {
+  const bytes = new Uint8Array(32);
+  window.crypto.getRandomValues(bytes);
+  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 export default function Home() {
-  const [authReady, setAuthReady] = useState(false);
-  const [userId, setUserId] = useState(null);
+  const [identityReady, setIdentityReady] = useState(false);
+  const [playerId, setPlayerId] = useState(null);
+  const [playerSecret, setPlayerSecret] = useState("");
   const [nickname, setNickname] = useState("");
   const [joinCode, setJoinCode] = useState("");
   const [roomId, setRoomId] = useState(null);
   const [room, setRoom] = useState(null);
   const [players, setPlayers] = useState([]);
-  const [rounds, setRounds] = useState([]);
+  const [currentRound, setCurrentRound] = useState(null);
   const [guesses, setGuesses] = useState([]);
   const [mySecret, setMySecret] = useState("");
   const [secretInput, setSecretInput] = useState("");
@@ -54,10 +57,31 @@ export default function Home() {
   const [error, setError] = useState("");
   const [now, setNow] = useState(Date.now());
 
-  const currentRound = useMemo(() => {
-    if (!room || room.current_round < 0) return null;
-    return rounds.find((item) => item.round_number === room.current_round) || null;
-  }, [room, rounds]);
+  useEffect(() => {
+    let id = window.sessionStorage.getItem("friendguess-player-id");
+    let secret = window.sessionStorage.getItem("friendguess-player-secret");
+
+    if (!id) {
+      id = window.crypto.randomUUID();
+      window.sessionStorage.setItem("friendguess-player-id", id);
+    }
+    if (!secret) {
+      secret = makeSecret();
+      window.sessionStorage.setItem("friendguess-player-secret", secret);
+    }
+
+    const savedNickname = window.localStorage.getItem("friendguess-nickname");
+    if (savedNickname) setNickname(savedNickname.slice(0, 18));
+
+    setPlayerId(id);
+    setPlayerSecret(secret);
+    setIdentityReady(true);
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   const sortedPlayers = useMemo(
     () => [...players].sort((a, b) => b.score - a.score || new Date(a.joined_at) - new Date(b.joined_at)),
@@ -74,118 +98,56 @@ export default function Home() {
     [players, currentRound]
   );
 
-  const isHost = room?.host_user_id === userId;
-  const isAnswerer = currentRound?.answerer_user_id === userId;
+  const isHost = Boolean(room && playerId && room.host_user_id === playerId);
+  const isAnswerer = Boolean(currentRound && playerId && currentRound.answerer_user_id === playerId);
   const timeLeft = currentRound?.ends_at
     ? Math.max(0, Math.ceil((new Date(currentRound.ends_at).getTime() - now) / 1000))
     : 60;
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem("friendguess-nickname");
-    if (saved) setNickname(saved.slice(0, 18));
-
-    async function ensureAnonymousSession() {
-      setError("");
-      const { data: sessionData } = await supabase.auth.getSession();
-      if (sessionData.session?.user) {
-        setUserId(sessionData.session.user.id);
-        setAuthReady(true);
-        return;
-      }
-
-      const { data, error: signInError } = await supabase.auth.signInAnonymously();
-      if (signInError) {
-        setError(formatError(signInError));
-        setAuthReady(true);
-        return;
-      }
-      setUserId(data.user?.id || data.session?.user?.id || null);
-      setAuthReady(true);
-    }
-
-    ensureAnonymousSession();
-  }, []);
-
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const refreshRoom = useCallback(async () => {
-    if (!roomId) return;
+    if (!roomId || !playerId || !playerSecret) return;
 
-    const [roomResult, playersResult, roundsResult] = await Promise.all([
-      supabase.from("rooms").select("*").eq("id", roomId).single(),
-      supabase.from("players").select("*").eq("room_id", roomId).order("joined_at", { ascending: true }),
-      supabase.from("rounds").select("*").eq("room_id", roomId).order("round_number", { ascending: true }),
-    ]);
+    const { data, error: rpcError } = await supabase.rpc("get_room_state", {
+      p_room_id: roomId,
+      p_user_id: playerId,
+      p_player_secret: playerSecret,
+    });
 
-    if (roomResult.error) {
-      setError(formatError(roomResult.error));
+    if (rpcError) {
+      setError(formatError(rpcError));
       return;
     }
 
-    setRoom(roomResult.data);
-    setPlayers(playersResult.data || []);
-    setRounds(roundsResult.data || []);
-    setRoundsTotal(roomResult.data.rounds_total || 6);
-
-    const activeRound = (roundsResult.data || []).find(
-      (item) => item.round_number === roomResult.data.current_round
-    );
-
-    if (activeRound) {
-      const guessesResult = await supabase
-        .from("guesses")
-        .select("*")
-        .eq("round_id", activeRound.id)
-        .order("created_at", { ascending: true });
-      setGuesses(guessesResult.data || []);
-
-      if (activeRound.answerer_user_id === userId) {
-        const secretResult = await supabase
-          .from("secret_answers")
-          .select("answer")
-          .eq("round_id", activeRound.id)
-          .maybeSingle();
-        setMySecret(secretResult.data?.answer || "");
-      } else {
-        setMySecret("");
-      }
-    } else {
-      setGuesses([]);
-      setMySecret("");
-    }
-  }, [roomId, userId]);
+    setRoom(data?.room || null);
+    setPlayers(data?.players || []);
+    setCurrentRound(data?.currentRound || null);
+    setGuesses(data?.guesses || []);
+    setMySecret(data?.mySecret || "");
+    if (data?.room?.rounds_total) setRoundsTotal(data.room.rounds_total);
+  }, [roomId, playerId, playerSecret]);
 
   useEffect(() => {
-    if (!roomId || !userId) return;
+    if (!roomId || !playerId || !playerSecret) return;
     refreshRoom();
-
-    const channel = supabase
-      .channel(`friendguess-${roomId}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "rooms", filter: `id=eq.${roomId}` }, refreshRoom)
-      .on("postgres_changes", { event: "*", schema: "public", table: "players", filter: `room_id=eq.${roomId}` }, refreshRoom)
-      .on("postgres_changes", { event: "*", schema: "public", table: "rounds", filter: `room_id=eq.${roomId}` }, refreshRoom)
-      .on("postgres_changes", { event: "*", schema: "public", table: "guesses", filter: `room_id=eq.${roomId}` }, refreshRoom)
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [roomId, userId, refreshRoom]);
+    const timer = window.setInterval(refreshRoom, 650);
+    return () => window.clearInterval(timer);
+  }, [roomId, playerId, playerSecret, refreshRoom]);
 
   useEffect(() => {
     if (!currentRound || currentRound.status !== "guessing" || timeLeft > 0) return;
-    supabase.rpc("finish_round_timeout", { p_round_id: currentRound.id }).then(() => refreshRoom());
-  }, [currentRound, timeLeft, refreshRoom]);
+    supabase.rpc("finish_round_timeout", {
+      p_round_id: currentRound.id,
+      p_user_id: playerId,
+      p_player_secret: playerSecret,
+    }).then(() => refreshRoom());
+  }, [currentRound, timeLeft, playerId, playerSecret, refreshRoom]);
 
   function rememberNickname() {
     window.localStorage.setItem("friendguess-nickname", nickname.trim());
   }
 
   async function createRoom() {
-    if (!nickname.trim() || !userId) return;
+    if (!nickname.trim() || !playerId || !playerSecret) return;
     setBusy(true);
     setError("");
     rememberNickname();
@@ -193,6 +155,8 @@ export default function Home() {
     const { data, error: rpcError } = await supabase.rpc("create_room", {
       p_nickname: nickname.trim(),
       p_rounds_total: roundsTotal,
+      p_user_id: playerId,
+      p_player_secret: playerSecret,
     });
 
     setBusy(false);
@@ -206,7 +170,7 @@ export default function Home() {
   }
 
   async function joinRoom() {
-    if (!nickname.trim() || joinCode.length !== 5 || !userId) return;
+    if (!nickname.trim() || joinCode.length !== 5 || !playerId || !playerSecret) return;
     setBusy(true);
     setError("");
     rememberNickname();
@@ -214,6 +178,8 @@ export default function Home() {
     const { data, error: rpcError } = await supabase.rpc("join_room", {
       p_code: joinCode,
       p_nickname: nickname.trim(),
+      p_user_id: playerId,
+      p_player_secret: playerSecret,
     });
 
     setBusy(false);
@@ -230,11 +196,15 @@ export default function Home() {
     if (!roomId || !isHost) return;
     setBusy(true);
     setError("");
+
     const { error: rpcError } = await supabase.rpc("start_game", {
       p_room_id: roomId,
+      p_user_id: playerId,
+      p_player_secret: playerSecret,
       p_question: QUESTIONS[0],
       p_rounds_total: roundsTotal,
     });
+
     setBusy(false);
     if (rpcError) setError(formatError(rpcError));
     else refreshRoom();
@@ -245,14 +215,17 @@ export default function Home() {
     if (!currentRound || !secretInput.trim()) return;
     setBusy(true);
     setError("");
+
     const { error: rpcError } = await supabase.rpc("lock_answer", {
       p_round_id: currentRound.id,
+      p_user_id: playerId,
+      p_player_secret: playerSecret,
       p_answer: secretInput.trim(),
     });
+
     setBusy(false);
     if (rpcError) setError(formatError(rpcError));
     else {
-      setMySecret(secretInput.trim());
       setSecretInput("");
       refreshRoom();
     }
@@ -265,15 +238,16 @@ export default function Home() {
     setGuessInput("");
     setError("");
 
-    const { error: insertError } = await supabase.from("guesses").insert({
-      room_id: roomId,
-      round_id: currentRound.id,
-      user_id: userId,
-      guess: submitted,
-      is_correct: false,
+    const { error: rpcError } = await supabase.rpc("submit_guess", {
+      p_room_id: roomId,
+      p_round_id: currentRound.id,
+      p_user_id: playerId,
+      p_player_secret: playerSecret,
+      p_guess: submitted,
     });
 
-    if (insertError) setError(formatError(insertError));
+    if (rpcError) setError(formatError(rpcError));
+    else refreshRoom();
   }
 
   async function advanceRound() {
@@ -281,10 +255,14 @@ export default function Home() {
     setBusy(true);
     setError("");
     const nextIndex = room.current_round + 1;
+
     const { error: rpcError } = await supabase.rpc("next_round", {
       p_room_id: roomId,
+      p_user_id: playerId,
+      p_player_secret: playerSecret,
       p_question: QUESTIONS[nextIndex % QUESTIONS.length],
     });
+
     setBusy(false);
     if (rpcError) setError(formatError(rpcError));
     else refreshRoom();
@@ -293,7 +271,14 @@ export default function Home() {
   async function resetRoom() {
     if (!isHost) return;
     setBusy(true);
-    const { error: rpcError } = await supabase.rpc("reset_room", { p_room_id: roomId });
+    setError("");
+
+    const { error: rpcError } = await supabase.rpc("reset_room", {
+      p_room_id: roomId,
+      p_user_id: playerId,
+      p_player_secret: playerSecret,
+    });
+
     setBusy(false);
     if (rpcError) setError(formatError(rpcError));
     else refreshRoom();
@@ -303,13 +288,15 @@ export default function Home() {
     setRoomId(null);
     setRoom(null);
     setPlayers([]);
-    setRounds([]);
+    setCurrentRound(null);
     setGuesses([]);
     setMySecret("");
+    setSecretInput("");
+    setGuessInput("");
     setError("");
   }
 
-  if (!authReady) {
+  if (!identityReady) {
     return <main className="loading-screen"><div className="loader-card">Connecting to FriendGuess…</div></main>;
   }
 
@@ -335,14 +322,14 @@ export default function Home() {
           />
 
           <label className="field-label" htmlFor="rounds">Rounds</label>
-          <select id="rounds" className="big-input select-input" value={roundsTotal} onChange={(e) => setRoundsTotal(Number(e.target.value))}>
+          <select id="rounds" className="big-input select-input" value={roundsTotal} onChange={(event) => setRoundsTotal(Number(event.target.value))}>
             <option value={4}>4 rounds</option>
             <option value={6}>6 rounds</option>
             <option value={8}>8 rounds</option>
             <option value={10}>10 rounds</option>
           </select>
 
-          <button className="primary-button" onClick={createRoom} disabled={busy || !nickname.trim() || !userId}>
+          <button className="primary-button" onClick={createRoom} disabled={busy || !nickname.trim()}>
             {busy ? "Creating…" : "Create private room"}
           </button>
 
@@ -357,7 +344,7 @@ export default function Home() {
               placeholder="ROOM CODE"
               maxLength={5}
             />
-            <button className="secondary-button" onClick={joinRoom} disabled={busy || !nickname.trim() || joinCode.length !== 5 || !userId}>
+            <button className="secondary-button" onClick={joinRoom} disabled={busy || !nickname.trim() || joinCode.length !== 5}>
               Join
             </button>
           </div>
@@ -399,15 +386,7 @@ export default function Home() {
             {isHost ? (
               <>
                 <div className="settings-row">
-                  <label>
-                    Rounds
-                    <select value={roundsTotal} onChange={(e) => setRoundsTotal(Number(e.target.value))}>
-                      <option value={4}>4</option>
-                      <option value={6}>6</option>
-                      <option value={8}>8</option>
-                      <option value={10}>10</option>
-                    </select>
-                  </label>
+                  <strong>{room.rounds_total} rounds</strong>
                   <span>60 seconds per turn</span>
                 </div>
                 <button className="primary-button" onClick={startGame} disabled={busy || players.length < 2}>
@@ -557,7 +536,7 @@ export default function Home() {
 
           {isAnswerer ? (
             <div className="answerer-controls">
-              <p>Your answer is hidden. Watch your friends guess in real time.</p>
+              <p>Your answer is hidden. Watch your friends guess live.</p>
             </div>
           ) : (
             <form className="guess-form" onSubmit={submitGuess}>
