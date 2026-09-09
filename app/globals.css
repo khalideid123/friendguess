@@ -55,6 +55,50 @@ button:disabled {
   display: grid;
   place-items: center;
   padding: 32px 18px;
+  isolation: isolate;
+}
+
+.home-shell::before {
+  content: "";
+  position: absolute;
+  inset: -15%;
+  z-index: -1;
+  pointer-events: none;
+  background: inherit;
+  animation: home-gradient-drift 22s ease-in-out infinite alternate;
+}
+
+.home-shell .orb-a {
+  animation: home-orb-a-drift 18s ease-in-out infinite alternate;
+}
+
+.home-shell .orb-b {
+  animation: home-orb-b-drift 24s ease-in-out infinite alternate;
+}
+
+@keyframes home-gradient-drift {
+  from { transform: translate3d(-4%, -3%, 0) rotate(-4deg) scale(1.05); }
+  to { transform: translate3d(4%, 3%, 0) rotate(4deg) scale(1.12); }
+}
+
+@keyframes home-orb-a-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(15vw, 18vh, 0) scale(1.2); }
+}
+
+@keyframes home-orb-b-drift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-18vw, -20vh, 0) scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-shell::before {
+    display: none;
+  }
+
+  .home-shell .bg-orb {
+    animation: none;
+  }
 }
 
 .floating-shape {
