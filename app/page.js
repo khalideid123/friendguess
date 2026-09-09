@@ -58,17 +58,15 @@ export default function Home() {
   const [now, setNow] = useState(Date.now());
 
   useEffect(() => {
-    let id = window.sessionStorage.getItem("friendguess-player-id");
-    let secret = window.sessionStorage.getItem("friendguess-player-secret");
+    // Chrome can copy sessionStorage when a tab is duplicated. If we reused
+    // that copied player id, player 3/4 would overwrite player 2. Give every
+    // page/tab load a fresh FriendGuess identity instead.
+    const id = window.crypto.randomUUID();
+    const secret = makeSecret();
 
-    if (!id) {
-      id = window.crypto.randomUUID();
-      window.sessionStorage.setItem("friendguess-player-id", id);
-    }
-    if (!secret) {
-      secret = makeSecret();
-      window.sessionStorage.setItem("friendguess-player-secret", secret);
-    }
+    window.sessionStorage.setItem("friendguess-player-id", id);
+    window.sessionStorage.setItem("friendguess-player-secret", secret);
+    window.sessionStorage.removeItem("friendguess-active-room-id");
 
     const savedNickname = window.localStorage.getItem("friendguess-nickname");
     if (savedNickname) setNickname(savedNickname.slice(0, 18));
