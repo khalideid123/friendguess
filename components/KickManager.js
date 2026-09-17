@@ -71,7 +71,12 @@ export default function KickManager() {
         return;
       }
 
-      const cards = document.querySelectorAll(".player-tile:not(.empty), .score-player, .score-row");
+      // Kick controls belong in the lobby and live player sidebar only.
+      // Keeping them out of round/final scoreboards prevents them from
+      // crowding the rank, nickname, and points columns.
+      const cards = document.querySelectorAll(
+        ".player-tile:not(.empty), .players-panel .score-player"
+      );
 
       cards.forEach((card) => {
         const nameNode = card.querySelector("strong");
