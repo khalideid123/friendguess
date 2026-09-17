@@ -1,10 +1,11 @@
 import "./globals.css";
 import "./multiplayer.css";
+import "./leaderboard.css";
 import SoundEffects from "../components/SoundEffects";
 import HintEnhancer from "../components/HintEnhancer";
 import PresenceManager from "../components/PresenceManager";
 import KickManager from "../components/KickManager";
-import SoloMultiplayerMode from "../components/SoloMultiplayerMode";
+import SoloMultiplayerModeV4 from "../components/SoloMultiplayerModeV4";
 
 export const metadata = {
   title: "FriendGuess",
@@ -16,7 +17,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         {children}
-        <SoloMultiplayerMode />
+        <SoloMultiplayerModeV4 />
         <PresenceManager />
         <KickManager />
         <HintEnhancer />
