@@ -12,21 +12,18 @@ const DIFFICULTIES = {
     description: "Familiar answers with very clear hints",
     seconds: 60,
     attempts: 6,
-    basePoints: 100,
   },
   medium: {
     label: "Medium",
     description: "Moderate answers with balanced hints",
     seconds: 50,
     attempts: 5,
-    basePoints: 175,
   },
   hard: {
     label: "Hard",
     description: "Challenging answers with less obvious hints",
     seconds: 40,
     attempts: 4,
-    basePoints: 275,
   },
 };
 
@@ -141,14 +138,13 @@ export default function SoloMultiplayerMode() {
   const [roundsTotal, setRoundsTotal] = useState(8);
   const [deck, setDeck] = useState([]);
   const [roundIndex, setRoundIndex] = useState(0);
-  const [humanScore, setHumanScore] = useState(0);
-  const [botScore, setBotScore] = useState(0);
   const [guessInput, setGuessInput] = useState("");
   const [wrongGuesses, setWrongGuesses] = useState([]);
   const [feed, setFeed] = useState([]);
   const [deadline, setDeadline] = useState(0);
   const [tick, setTick] = useState(Date.now());
   const [roundResult, setRoundResult] = useState(null);
+  const [history, setHistory] = useState([]);
 
   const config = DIFFICULTIES[difficulty];
   const current = deck[roundIndex] || null;
@@ -156,16 +152,8 @@ export default function SoloMultiplayerMode() {
     ? Math.max(0, Math.ceil((deadline - tick) / 1000))
     : config.seconds;
   const attemptsLeft = Math.max(0, config.attempts - wrongGuesses.length);
-
-  const players = useMemo(() => [
-    { id: "human", nickname: playerName || "Player", avatar: "😎", score: humanScore },
-    { ...BOT, score: botScore },
-  ], [playerName, humanScore, botScore]);
-
-  const sortedPlayers = useMemo(
-    () => [...players].sort((a, b) => b.score - a.score),
-    [players]
-  );
+  const correctCount = useMemo(() => history.filter((item) => item.correct).length, [history]);
+  const accuracy = history.length ? Math.round((correctCount / history.length) * 100) : 0;
 
   useEffect(() => {
     const updateTarget = () => {
@@ -173,10 +161,12 @@ export default function SoloMultiplayerMode() {
       const target = activeRoom ? null : document.querySelector(".hero-card");
       setHomeTarget((existing) => (existing === target ? existing : target));
     };
+
     updateTarget();
     const observer = new MutationObserver(updateTarget);
     observer.observe(document.body, { childList: true, subtree: true });
     const timer = window.setInterval(updateTarget, 800);
+
     return () => {
       observer.disconnect();
       window.clearInterval(timer);
@@ -226,26 +216,32 @@ export default function SoloMultiplayerMode() {
     setPhase("setup");
     setDeck([]);
     setRoundIndex(0);
-    setHumanScore(0);
-    setBotScore(0);
+    setHistory([]);
     resetRoundState();
   }
 
-  function prepareGame() {
+  function enterLobby() {
     const safeName = playerName.trim().slice(0, 18) || "Player";
     window.localStorage.setItem("friendguess-nickname", safeName);
     setPlayerName(safeName);
-    const nextDeck = shuffle(QUESTION_POOLS[difficulty]).slice(0, roundsTotal).map(toQuestion);
-    setDeck(nextDeck);
+    setHistory([]);
     setRoundIndex(0);
-    setHumanScore(0);
-    setBotScore(0);
     resetRoundState();
     setPhase("lobby");
   }
 
-  function startRound() {
+  function startGame() {
+    const nextDeck = shuffle(QUESTION_POOLS[difficulty])
+      .slice(0, roundsTotal)
+      .map(toQuestion);
+    setDeck(nextDeck);
+    setRoundIndex(0);
+    setHistory([]);
     resetRoundState();
+    beginRound();
+  }
+
+  function beginRound() {
     const now = Date.now();
     setTick(now);
     setDeadline(now + config.seconds * 1000);
@@ -254,21 +250,16 @@ export default function SoloMultiplayerMode() {
 
   function finishRound(correct, reason) {
     if (phase !== "playing" || !current) return;
-    setDeadline(0);
 
-    let earned = 0;
-    if (correct) {
-      const speedBonus = Math.max(0, timeLeft * 2);
-      const missPenalty = wrongGuesses.length * 12;
-      earned = Math.max(config.basePoints, config.basePoints + speedBonus - missPenalty);
-      setHumanScore((score) => score + earned);
-      setFeed((items) => [...items, makeFeedLine(`${playerName} guessed the answer!`, "correct")]);
-    } else {
-      setBotScore((score) => score + config.basePoints);
-      setFeed((items) => [...items, makeFeedLine(reason === "attempts" ? "No guesses left — Milo wins the round." : "Time ran out — Milo wins the round.", "system")]);
-    }
+    const result = {
+      correct,
+      reason,
+      answer: current.answer,
+      question: current.question,
+    };
 
-    setRoundResult({ correct, reason, earned });
+    setHistory((items) => [...items, result]);
+    setRoundResult(result);
     setPhase("roundComplete");
   }
 
@@ -278,28 +269,31 @@ export default function SoloMultiplayerMode() {
 
     const submitted = guessInput.trim();
     const normalized = normalize(submitted);
-    const correct = current.answers.some((answer) => normalize(answer) === normalized);
+    const isCorrect = current.answers.some((answer) => normalize(answer) === normalized);
+
     setGuessInput("");
 
-    if (correct) {
+    if (isCorrect) {
+      setFeed((items) => [...items, makeFeedLine(`${playerName} guessed the answer!`, "correct")]);
       finishRound(true, "correct");
       return;
     }
 
     const nextWrong = [...wrongGuesses, submitted];
     setWrongGuesses(nextWrong);
-    setFeed((items) => [...items, makeFeedLine(`${playerName}: ${submitted}`, "guess")]);
+    setFeed((items) => [...items, makeFeedLine(`${playerName}: ${submitted}`)]);
 
     if (nextWrong.length >= config.attempts) {
-      window.setTimeout(() => finishRound(false, "attempts"), 0);
+      finishRound(false, "attempts");
     }
   }
 
   function nextRound() {
-    if (roundIndex + 1 >= roundsTotal) {
+    if (roundIndex + 1 >= deck.length) {
       setPhase("finished");
       return;
     }
+
     setRoundIndex((index) => index + 1);
     resetRoundState();
     const now = Date.now();
@@ -309,20 +303,21 @@ export default function SoloMultiplayerMode() {
   }
 
   function playAgain() {
-    const nextDeck = shuffle(QUESTION_POOLS[difficulty]).slice(0, roundsTotal).map(toQuestion);
-    setDeck(nextDeck);
-    setRoundIndex(0);
-    setHumanScore(0);
-    setBotScore(0);
-    resetRoundState();
     setPhase("lobby");
+    setDeck([]);
+    setRoundIndex(0);
+    setHistory([]);
+    resetRoundState();
   }
 
   const launcher = homeTarget ? createPortal(
     <div className={styles.launcherWrap}>
-      <div className={styles.launcherDivider}><span>or play solo</span></div>
+      <div className={styles.launcherDivider}><span>or</span></div>
       <button className={styles.launcherButton} type="button" onClick={openSolo}>
-        <span><strong>Play solo vs bot</strong><small>Same FriendGuess-style game with one bot and built-in hints</small></span>
+        <span>
+          <strong>Play solo vs Milo</strong>
+          <small>Practice the FriendGuess experience by yourself</small>
+        </span>
       </button>
     </div>,
     homeTarget
@@ -331,25 +326,37 @@ export default function SoloMultiplayerMode() {
   if (!open) return launcher;
 
   if (phase === "setup") {
-    return <>
-      {launcher}
-      {createPortal(
+    return (
+      <>
+        {launcher}
         <div className={styles.overlay}>
           <main className={styles.setupShell}>
             <section className={styles.setupCard}>
               <div className={styles.setupHeader}>
                 <div className={styles.logoMark}>FG</div>
-                <h2>Solo vs Milo</h2>
-                <p>You are always the guesser. Milo always chooses the hidden answer, and every round gives you a hint.</p>
+                <h2>Solo bot mode</h2>
+                <p>You will always guess Milo's hidden answers. Hints make the solo version possible without needing a friend.</p>
               </div>
 
               <label className="field-label" htmlFor="solo-name">Nickname</label>
-              <input id="solo-name" className="big-input" value={playerName} onChange={(event) => setPlayerName(event.target.value.slice(0, 18))} maxLength={18} placeholder="Enter your nickname" />
+              <input
+                id="solo-name"
+                className="big-input"
+                value={playerName}
+                onChange={(event) => setPlayerName(event.target.value.slice(0, 18))}
+                maxLength={18}
+                placeholder="Enter your nickname"
+              />
 
               <label className="field-label" style={{ marginTop: 18 }}>Difficulty</label>
               <div className={styles.difficultyGrid}>
                 {Object.entries(DIFFICULTIES).map(([key, item]) => (
-                  <button key={key} type="button" className={`${styles.difficultyButton} ${difficulty === key ? styles.difficultySelected : ""}`} onClick={() => setDifficulty(key)}>
+                  <button
+                    key={key}
+                    type="button"
+                    className={`${styles.difficultyButton} ${difficulty === key ? styles.difficultySelected : ""}`}
+                    onClick={() => setDifficulty(key)}
+                  >
                     <strong>{item.label}</strong>
                     <small>{item.description}</small>
                   </button>
@@ -357,175 +364,199 @@ export default function SoloMultiplayerMode() {
               </div>
 
               <label className="field-label" htmlFor="solo-rounds">Rounds</label>
-              <select id="solo-rounds" className="big-input select-input" value={roundsTotal} onChange={(event) => setRoundsTotal(Number(event.target.value))}>
-                <option value={4}>4 rounds</option>
-                <option value={6}>6 rounds</option>
+              <select
+                id="solo-rounds"
+                className="big-input select-input"
+                value={roundsTotal}
+                onChange={(event) => setRoundsTotal(Number(event.target.value))}
+              >
+                <option value={5}>5 rounds</option>
                 <option value={8}>8 rounds</option>
                 <option value={10}>10 rounds</option>
               </select>
 
-              <button className="primary-button" type="button" onClick={prepareGame}>Continue</button>
-              <button className="ghost-button" type="button" onClick={closeSolo}>Back to FriendGuess</button>
+              <button className="primary-button" type="button" onClick={enterLobby}>
+                Enter bot room
+              </button>
+              <button className="ghost-button" type="button" onClick={closeSolo}>
+                Back
+              </button>
             </section>
           </main>
-        </div>,
-        document.body
-      )}
-    </>;
+        </div>
+      </>
+    );
   }
 
   if (phase === "lobby") {
-    return <>
-      {launcher}
-      {createPortal(
-        <div className={styles.overlay}>
-          <main className="game-bg">
-            <header className="topbar">
-              <div className="brand-small"><span>FG</span> FriendGuess</div>
-              <div className="room-pill">Solo <strong>1V1</strong></div>
-            </header>
-            <section className="lobby-wrap">
-              <div className="lobby-card">
-                <p className="eyebrow">SOLO ROOM</p>
-                <h2>You vs Milo</h2>
-                <p>This looks and plays like a FriendGuess room, but Milo is always the Answerer and you are always the guesser.</p>
-                <div className={styles.lobbyDifficulty}>{config.label} · {roundsTotal} rounds</div>
-                <div className="player-grid">
-                  <div className="player-tile"><span className="avatar">😎</span><strong>{playerName}</strong><small>YOU</small></div>
-                  <div className="player-tile"><span className="avatar">{BOT.avatar}</span><strong>{BOT.nickname}</strong><small>BOT · ANSWERER</small></div>
+    return (
+      <div className={styles.overlay}>
+        <main className="game-bg">
+          <header className="topbar">
+            <div className="brand-small"><span>FG</span> FriendGuess</div>
+            <div className="room-pill">Solo <strong>BOT</strong></div>
+          </header>
+          <section className="lobby-wrap">
+            <div className="lobby-card">
+              <p className="eyebrow">BOT ROOM</p>
+              <h2>You vs Milo</h2>
+              <p>Same FriendGuess-style guessing flow, but Milo is always the Answerer and you are always the guesser.</p>
+              <div className={styles.lobbyDifficulty}>{config.label} · {roundsTotal} rounds</div>
+
+              <div className="player-grid">
+                <div className="player-tile">
+                  <span className="avatar">😎</span>
+                  <strong>{playerName}</strong>
+                  <small>YOU</small>
                 </div>
-                <div className="settings-row"><strong>{roundsTotal} rounds</strong><span>{config.seconds} seconds · {config.attempts} guesses each round</span></div>
-                <button className="primary-button" type="button" onClick={startRound}>Start game</button>
-                <button className="ghost-button" type="button" onClick={closeSolo}>Leave room</button>
+                <div className="player-tile">
+                  <span className="avatar">{BOT.avatar}</span>
+                  <strong>{BOT.nickname}</strong>
+                  <small>ANSWERER</small>
+                </div>
               </div>
-            </section>
-          </main>
-        </div>,
-        document.body
-      )}
-    </>;
+
+              <div className="settings-row">
+                <strong>{roundsTotal} rounds</strong>
+                <span>{config.seconds} seconds · {config.attempts} guesses per round</span>
+              </div>
+
+              <button className="primary-button" type="button" onClick={startGame}>Start game</button>
+              <button className="ghost-button" type="button" onClick={() => setPhase("setup")}>Change settings</button>
+              <button className="ghost-button" type="button" onClick={closeSolo}>Leave bot room</button>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
   }
 
   if (phase === "finished") {
-    const humanWon = humanScore > botScore;
-    const tied = humanScore === botScore;
-    return <>
-      {launcher}
-      {createPortal(
-        <div className={styles.overlay}>
-          <main className="game-bg confetti-bg">
-            <section className="center-stage">
-              <div className="result-card final-card">
-                <div className="trophy">🏆</div>
-                <p className="eyebrow">GAME OVER</p>
-                <h2>{tied ? "It's a tie!" : humanWon ? `${playerName} wins!` : "Milo wins!"}</h2>
-                <ScoreList players={sortedPlayers} />
-                <button className="primary-button" type="button" onClick={playAgain}>Play again</button>
-                <button className="ghost-button" type="button" onClick={closeSolo}>Back to FriendGuess</button>
+    return (
+      <div className={styles.overlay}>
+        <main className="game-bg confetti-bg">
+          <section className="center-stage">
+            <div className="result-card final-card">
+              <div className="trophy">🏁</div>
+              <p className="eyebrow">YOUR RESULTS</p>
+              <h2>You got {correctCount} out of {history.length} correct</h2>
+              <p>{accuracy}% accuracy on {config.label} difficulty.</p>
+
+              <div className="result-scores">
+                <div><span>Correct answers</span><strong>{correctCount}</strong></div>
+                <div><span>Missed answers</span><strong>{history.length - correctCount}</strong></div>
+                <div><span>Total rounds</span><strong>{history.length}</strong></div>
               </div>
-            </section>
-          </main>
-        </div>,
-        document.body
-      )}
-    </>;
+
+              <button className="primary-button" type="button" onClick={playAgain}>Play again</button>
+              <button className="ghost-button" type="button" onClick={closeSolo}>Back to FriendGuess</button>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
   }
 
-  if (!current) return null;
-
-  if (phase === "roundComplete") {
-    return <>
-      {launcher}
-      {createPortal(
-        <div className={styles.overlay}>
-          <main className="game-bg">
-            <GameHeader roundIndex={roundIndex} roundsTotal={roundsTotal} timeLeft={0} difficulty={config.label} closeSolo={closeSolo} />
-            <section className="center-stage">
-              <div className="result-card">
-                <p className="eyebrow">ROUND {roundIndex + 1} COMPLETE</p>
-                <h2>{roundResult?.correct ? `${playerName} got it!` : "Milo takes the round!"}</h2>
-                <p>The answer was</p>
-                <div className="reveal-answer">{current.answer}</div>
-                {roundResult?.correct && <p><strong>+{roundResult.earned} points</strong></p>}
-                <ScoreList players={sortedPlayers} />
-                <button className="primary-button" type="button" onClick={nextRound}>{roundIndex + 1 >= roundsTotal ? "See final scores" : "Next round"}</button>
-              </div>
-            </section>
-          </main>
-        </div>,
-        document.body
-      )}
-    </>;
-  }
-
-  return <>
-    {launcher}
-    {createPortal(
+  if (phase === "roundComplete" && roundResult) {
+    const isLastRound = roundIndex + 1 >= deck.length;
+    return (
       <div className={styles.overlay}>
         <main className="game-bg">
-          <GameHeader roundIndex={roundIndex} roundsTotal={roundsTotal} timeLeft={timeLeft} difficulty={config.label} closeSolo={closeSolo} />
-          <div className="game-layout">
-            <aside className="players-panel">
-              <h3>Players</h3>
-              {sortedPlayers.map((player, index) => (
-                <div className={`score-player ${player.id === BOT.id ? "active-player" : ""}`} key={player.id}>
-                  <span className="rank">#{index + 1}</span>
-                  <span className="avatar small">{player.avatar}</span>
-                  <div><strong>{player.nickname}</strong><small>{player.score} pts</small></div>
-                  {player.id === BOT.id && <span className="answerer-dot" title="Answerer" />}
+          <GameHeader
+            roundNumber={roundIndex + 1}
+            roundsTotal={roundsTotal}
+            timeLeft={timeLeft}
+            difficulty={config.label}
+            onExit={closeSolo}
+          />
+          <section className="center-stage">
+            <div className="result-card">
+              <p className="eyebrow">ROUND {roundIndex + 1} COMPLETE</p>
+              <h2>{roundResult.correct ? "You got it!" : roundResult.reason === "time" ? "Time ran out" : "No guesses left"}</h2>
+              <p>The answer was</p>
+              <div className="reveal-answer">{roundResult.answer}</div>
+              <p>{correctCount} correct so far out of {history.length} played.</p>
+              <button className="primary-button" type="button" onClick={nextRound}>
+                {isLastRound ? "See your results" : "Next round"}
+              </button>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles.overlay}>
+      <main className="game-bg">
+        <GameHeader
+          roundNumber={roundIndex + 1}
+          roundsTotal={roundsTotal}
+          timeLeft={timeLeft}
+          difficulty={config.label}
+          onExit={closeSolo}
+        />
+
+        <div className="game-layout">
+          <aside className="players-panel">
+            <h3>Players</h3>
+            <div className="score-player">
+              <span className="rank">#1</span>
+              <span className="avatar small">😎</span>
+              <div><strong>{playerName}</strong><small>Guessing</small></div>
+            </div>
+            <div className="score-player active-player">
+              <span className="rank">#2</span>
+              <span className="avatar small">{BOT.avatar}</span>
+              <div><strong>{BOT.nickname}</strong><small>Answerer</small></div>
+              <span className="answerer-dot" title="Answerer" />
+            </div>
+          </aside>
+
+          <section className="play-panel">
+            <div className="question-card">
+              <p>Milo answered:</p>
+              <h2>{current?.question}</h2>
+              <div className="hidden-answer">Secret answer: <strong>••••••••</strong></div>
+              <div className={styles.hintBanner}><strong>Hint:</strong> {current?.hint}</div>
+              <p style={{ marginTop: 12 }}>{attemptsLeft} {attemptsLeft === 1 ? "guess" : "guesses"} left</p>
+            </div>
+
+            <div className="guess-feed" aria-live="polite">
+              {feed.length === 0 && <p className="empty-feed">Your guesses will appear here…</p>}
+              {feed.map((item) => (
+                <div className={`feed-line ${item.type === "correct" ? "correct" : "guess"}`} key={item.id}>
+                  {item.text}
                 </div>
               ))}
-            </aside>
+            </div>
 
-            <section className="play-panel">
-              <div className="question-card">
-                <p>{BOT.nickname} answered:</p>
-                <h2>{current.question}</h2>
-                <div className="hidden-answer">Secret answer: <strong>••••••••</strong></div>
-                <div className={styles.hintBanner}><strong>Hint:</strong> {current.hint}</div>
-              </div>
-
-              <div className="guess-feed" aria-live="polite">
-                {feed.length === 0 && <p className="empty-feed">Your guesses will appear here…</p>}
-                {feed.map((item) => (
-                  <div className={`feed-line ${item.type}`} key={item.id}>{item.text}</div>
-                ))}
-              </div>
-
-              <form className="guess-form" onSubmit={submitGuess}>
-                <input autoFocus value={guessInput} onChange={(event) => setGuessInput(event.target.value.slice(0, 40))} placeholder={`Type a guess… (${attemptsLeft} left)`} maxLength={40} disabled={timeLeft <= 0} />
-                <button type="submit" disabled={!guessInput.trim() || timeLeft <= 0}>Guess</button>
-              </form>
-            </section>
-          </div>
-        </main>
-      </div>,
-      document.body
-    )}
-  </>;
-}
-
-function GameHeader({ roundIndex, roundsTotal, timeLeft, difficulty, closeSolo }) {
-  return (
-    <header className="topbar game-topbar">
-      <div className="brand-small"><span>FG</span> FriendGuess</div>
-      <div className="round-info">Round <strong>{roundIndex + 1}/{roundsTotal}</strong></div>
-      <div className={`timer ${timeLeft <= 10 ? "timer-danger" : ""}`}>{timeLeft}s</div>
-      <div className={styles.difficultyPill}>{difficulty}</div>
-      <button className={styles.soloTopButton} type="button" onClick={closeSolo}>Leave</button>
-    </header>
+            <form className="guess-form" onSubmit={submitGuess}>
+              <input
+                autoFocus
+                value={guessInput}
+                onChange={(event) => setGuessInput(event.target.value.slice(0, 40))}
+                placeholder="Type a guess…"
+                maxLength={40}
+                disabled={timeLeft <= 0}
+              />
+              <button type="submit" disabled={!guessInput.trim() || timeLeft <= 0}>Guess</button>
+            </form>
+          </section>
+        </div>
+      </main>
+    </div>
   );
 }
 
-function ScoreList({ players }) {
+function GameHeader({ roundNumber, roundsTotal, timeLeft, difficulty, onExit }) {
   return (
-    <div className="result-scores">
-      {players.map((player, index) => (
-        <div key={player.id}>
-          <span>#{index + 1} {player.nickname}</span>
-          <strong>{player.score} pts</strong>
-        </div>
-      ))}
-    </div>
+    <header className="topbar game-topbar">
+      <div className="brand-small"><span>FG</span> FriendGuess</div>
+      <div className="round-info">Round <strong>{roundNumber}/{roundsTotal}</strong></div>
+      <div className={`timer ${timeLeft <= 10 ? "timer-danger" : ""}`}>{timeLeft}s</div>
+      <div className={styles.difficultyPill}>{difficulty}</div>
+      <button className={styles.soloTopButton} type="button" onClick={onExit}>Exit</button>
+    </header>
   );
 }
