@@ -58,6 +58,15 @@
   grid-template-columns: 30px 42px minmax(0, 1fr) 12px;
 }
 
+.score-player:has(.fg-kick-button) {
+  grid-template-columns: 30px 42px minmax(0, 1fr) 12px auto;
+}
+
+.score-player > .fg-kick-button {
+  grid-column: 5;
+  margin-left: 0;
+}
+
 .score-player > div {
   min-width: 0;
 }
@@ -96,5 +105,10 @@
     min-width: 62px;
     padding-left: 6px;
     font-size: 0.86rem;
+  }
+
+  .score-player:has(.fg-kick-button) {
+    grid-template-columns: 26px 38px minmax(0, 1fr) 10px auto;
+    gap: 6px;
   }
 }
