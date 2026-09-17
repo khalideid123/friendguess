@@ -1,0 +1,626 @@
+.launcherWrap {
+  margin-top: 18px;
+}
+
+.launcherDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+.launcherDivider::before,
+.launcherDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.launcherButton {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  border: 1px solid rgba(140, 115, 255, 0.42);
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, rgba(95, 66, 210, 0.3), rgba(40, 31, 81, 0.55));
+  color: #fff;
+  cursor: pointer;
+  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+}
+
+.launcherButton:hover {
+  transform: translateY(-1px);
+  border-color: rgba(175, 157, 255, 0.78);
+  background: linear-gradient(135deg, rgba(115, 82, 235, 0.4), rgba(48, 37, 95, 0.68));
+}
+
+.launcherButton strong,
+.launcherButton small {
+  display: block;
+  text-align: left;
+}
+
+.launcherButton strong {
+  font-size: 0.98rem;
+}
+
+.launcherButton small {
+  margin-top: 3px;
+  color: rgba(255, 255, 255, 0.66);
+  font-size: 0.75rem;
+}
+
+.launcherIcon {
+  font-size: 1.6rem;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  overflow-y: auto;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(92, 55, 221, 0.22), transparent 34%),
+    radial-gradient(circle at 85% 22%, rgba(22, 160, 133, 0.15), transparent 28%),
+    #090a10;
+  color: #fff;
+}
+
+.soloShell {
+  min-height: 100%;
+  width: min(760px, 100%);
+  margin: 0 auto;
+  padding: 0 20px 42px;
+}
+
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  min-height: 72px;
+  display: grid;
+  grid-template-columns: 48px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  background: rgba(9, 10, 16, 0.86);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.backButton {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 1.35rem;
+  cursor: pointer;
+}
+
+.soloBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.soloBrand > span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7c5cff, #4d34d4);
+  font-weight: 900;
+  font-size: 0.72rem;
+}
+
+.topScore {
+  font-weight: 800;
+  color: #cfc4ff;
+}
+
+.setupCard,
+.resultCard {
+  width: min(620px, 100%);
+  margin: 42px auto 0;
+  padding: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 26px;
+  background: rgba(18, 19, 30, 0.9);
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.32);
+}
+
+.botHero,
+.resultEmoji {
+  font-size: 3.4rem;
+  margin-bottom: 8px;
+}
+
+.eyebrow,
+.category {
+  margin: 0 0 8px;
+  color: #a995ff;
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.setupCard h2,
+.resultCard h2,
+.questionCard h2 {
+  margin: 0;
+  line-height: 1.12;
+}
+
+.setupCard h2,
+.resultCard h2 {
+  font-size: clamp(1.7rem, 5vw, 2.5rem);
+}
+
+.setupText {
+  margin: 12px 0 26px;
+  color: rgba(255, 255, 255, 0.68);
+  line-height: 1.55;
+}
+
+.label {
+  display: block;
+  margin: 18px 0 8px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 0.84rem;
+  font-weight: 800;
+}
+
+.input,
+.guessInput {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid rgba(255, 255, 255, 0.13);
+  border-radius: 14px;
+  background: #10111a;
+  color: #fff;
+  outline: none;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.input {
+  min-height: 48px;
+  padding: 0 14px;
+  font-size: 0.96rem;
+}
+
+.input:focus,
+.guessInput:focus {
+  border-color: #8f75ff;
+  box-shadow: 0 0 0 3px rgba(125, 91, 255, 0.15);
+}
+
+.difficultyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.difficultyCard {
+  min-height: 112px;
+  padding: 14px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.035);
+  color: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.difficultyCard strong,
+.difficultyCard small {
+  display: block;
+}
+
+.difficultyCard strong {
+  margin-bottom: 7px;
+  font-size: 1rem;
+}
+
+.difficultyCard small {
+  color: rgba(255, 255, 255, 0.58);
+  line-height: 1.35;
+}
+
+.difficultyCard.selected {
+  border-color: #8d72ff;
+  background: rgba(123, 88, 255, 0.16);
+  box-shadow: inset 0 0 0 1px rgba(141, 114, 255, 0.22);
+}
+
+.primaryButton,
+.secondaryAction,
+.clueButton,
+.skipButton,
+.guessButton {
+  border: 0;
+  font: inherit;
+  cursor: pointer;
+}
+
+.primaryButton {
+  width: 100%;
+  margin-top: 22px;
+  min-height: 52px;
+  border-radius: 15px;
+  background: linear-gradient(135deg, #7c5cff, #5b3ce6);
+  color: #fff;
+  font-weight: 900;
+  box-shadow: 0 12px 26px rgba(85, 55, 210, 0.28);
+}
+
+.playArea {
+  width: min(680px, 100%);
+  margin: 26px auto 0;
+}
+
+.statusRow {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.statusRow > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.botAvatar {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  background: rgba(124, 92, 255, 0.15);
+}
+
+.roundPill,
+.timer {
+  border-radius: 999px;
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+.timer {
+  min-width: 48px;
+  text-align: center;
+}
+
+.timerDanger {
+  color: #ff8585;
+  border-color: rgba(255, 95, 95, 0.35);
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.progressTrack {
+  height: 7px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 16px;
+}
+
+.progressTrack span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7c5cff, #26d0a8);
+  transition: width 220ms ease;
+}
+
+.questionCard {
+  padding: 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(18, 19, 30, 0.92);
+}
+
+.questionCard h2 {
+  font-size: clamp(1.55rem, 5vw, 2.25rem);
+}
+
+.hintBox {
+  margin-top: 20px;
+  padding: 17px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 210, 94, 0.2);
+  background: rgba(255, 198, 54, 0.07);
+}
+
+.hintBox span {
+  color: #ffd66d;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.11em;
+}
+
+.hintBox p {
+  margin: 7px 0 0;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.extraClue {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(52, 208, 169, 0.08);
+  border: 1px solid rgba(52, 208, 169, 0.18);
+  color: #baf7e8;
+  font-size: 0.9rem;
+}
+
+.clueButton {
+  margin-top: 12px;
+  padding: 10px 13px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.82);
+  font-weight: 800;
+}
+
+.guessForm {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.guessInput {
+  min-height: 54px;
+  padding: 0 16px;
+  font-size: 1rem;
+}
+
+.guessButton {
+  min-width: 108px;
+  border-radius: 14px;
+  padding: 0 18px;
+  background: #fff;
+  color: #11121a;
+  font-weight: 900;
+}
+
+.guessButton:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.gameMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.gameMeta span {
+  padding: 7px 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.63);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.feedback {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border-radius: 12px;
+  background: rgba(255, 130, 130, 0.08);
+  border: 1px solid rgba(255, 130, 130, 0.14);
+  color: #ffb9b9;
+}
+
+.wrongList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  color: rgba(255, 255, 255, 0.52);
+  font-size: 0.78rem;
+}
+
+.wrongList b {
+  padding: 6px 9px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.055);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.skipButton {
+  display: block;
+  margin: 16px auto 0;
+  padding: 10px 14px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.52);
+  font-weight: 700;
+}
+
+.resultCard {
+  text-align: center;
+}
+
+.resultCard > p:not(.eyebrow) {
+  color: rgba(255, 255, 255, 0.63);
+}
+
+.revealAnswer {
+  display: inline-block;
+  min-width: 170px;
+  margin: 8px 0 10px;
+  padding: 12px 22px;
+  border-radius: 15px;
+  background: rgba(124, 92, 255, 0.16);
+  border: 1px solid rgba(143, 117, 255, 0.3);
+  font-size: 1.5rem;
+  font-weight: 900;
+  text-transform: capitalize;
+}
+
+.pointsEarned {
+  margin: 8px 0 18px;
+  color: #72e8c8;
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.miniStats,
+.finalStats {
+  display: grid;
+  gap: 10px;
+  margin: 22px 0 6px;
+}
+
+.miniStats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.miniStats span,
+.finalStats > div {
+  padding: 14px 8px;
+  border-radius: 15px;
+  background: rgba(255, 255, 255, 0.045);
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.miniStats strong,
+.finalStats strong,
+.finalStats span {
+  display: block;
+}
+
+.miniStats strong,
+.finalStats strong {
+  margin-top: 3px;
+  color: #fff;
+  font-size: 1.15rem;
+}
+
+.finalStats {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.finalStats span {
+  margin-top: 4px;
+  font-size: 0.76rem;
+}
+
+.historyList {
+  margin-top: 18px;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.historyList > div {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 13px;
+  text-align: left;
+  background: rgba(255, 255, 255, 0.025);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.historyList > div:last-child {
+  border-bottom: 0;
+}
+
+.historyList strong {
+  text-transform: capitalize;
+}
+
+.historyList small {
+  color: rgba(255, 255, 255, 0.56);
+}
+
+.secondaryAction {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+  font-weight: 800;
+}
+
+@media (max-width: 640px) {
+  .soloShell {
+    padding: 0 14px 28px;
+  }
+
+  .topbar {
+    min-height: 64px;
+  }
+
+  .setupCard,
+  .resultCard {
+    margin-top: 20px;
+    padding: 22px 18px;
+    border-radius: 22px;
+  }
+
+  .difficultyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .difficultyCard {
+    min-height: auto;
+  }
+
+  .statusRow {
+    grid-template-columns: 1fr auto;
+  }
+
+  .roundPill {
+    display: none;
+  }
+
+  .questionCard {
+    padding: 20px 17px;
+  }
+
+  .guessForm {
+    grid-template-columns: 1fr;
+  }
+
+  .guessButton {
+    min-height: 50px;
+  }
+
+  .miniStats,
+  .finalStats {
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .miniStats span,
+  .finalStats > div {
+    padding: 12px 5px;
+    font-size: 0.72rem;
+  }
+}
