@@ -255,6 +255,16 @@
   animation: flash 350ms ease;
 }
 
+/* Solo mode has no leaderboard or points. Keep the multiplayer-style
+   player panel, but show only avatar, name/role, and Answerer status. */
+.overlay :global(.players-panel .score-player) {
+  grid-template-columns: 42px minmax(0, 1fr) 12px;
+}
+
+.overlay :global(.players-panel .score-player .rank) {
+  display: none;
+}
+
 @keyframes flash {
   50% { transform: scale(1.01); }
 }
