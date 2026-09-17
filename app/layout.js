@@ -4,6 +4,7 @@ import SoundEffects from "../components/SoundEffects";
 import HintEnhancer from "../components/HintEnhancer";
 import PresenceManager from "../components/PresenceManager";
 import KickManager from "../components/KickManager";
+import SoloModeLauncher from "../components/SoloModeLauncher";
 
 export const metadata = {
   title: "FriendGuess",
@@ -15,6 +16,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body>
         {children}
+        <SoloModeLauncher />
         <PresenceManager />
         <KickManager />
         <HintEnhancer />
