@@ -1,0 +1,275 @@
+.launcherWrap {
+  margin-top: 18px;
+}
+
+.launcherDivider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  color: #9a9eb0;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.launcherDivider::before,
+.launcherDivider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7f0;
+}
+
+.launcherButton {
+  width: 100%;
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ddd8ff;
+  border-radius: 16px;
+  background: #f7f5ff;
+  color: #4f3db5;
+  font: inherit;
+  cursor: pointer;
+  transition: transform 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.launcherButton:hover {
+  transform: translateY(-1px);
+  border-color: #b9adff;
+  background: #f0edff;
+}
+
+.launcherButton strong,
+.launcherButton small {
+  display: block;
+  text-align: center;
+}
+
+.launcherButton strong {
+  font-size: 0.98rem;
+}
+
+.launcherButton small {
+  margin-top: 3px;
+  color: #777b91;
+  font-size: 0.76rem;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  overflow: auto;
+  background: #f5f5fb;
+}
+
+.setupShell {
+  min-height: 100vh;
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 32px 18px;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 10% 15%, rgba(121, 214, 255, 0.45), transparent 26%),
+    radial-gradient(circle at 92% 80%, rgba(255, 216, 90, 0.38), transparent 28%),
+    linear-gradient(135deg, #6f54ed 0%, #8c6ff7 48%, #56c9df 100%);
+}
+
+.setupCard {
+  position: relative;
+  z-index: 2;
+  width: min(560px, 100%);
+  padding: 32px;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  border-radius: 28px;
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 18px 55px rgba(42, 33, 92, 0.16);
+}
+
+.setupHeader {
+  text-align: center;
+}
+
+.setupHeader h2 {
+  margin: 8px 0 8px;
+  font-size: clamp(30px, 5vw, 44px);
+  letter-spacing: -0.045em;
+}
+
+.setupHeader p {
+  margin: 0 0 24px;
+  color: #747a92;
+  line-height: 1.5;
+}
+
+.logoMark {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto;
+  display: grid;
+  place-items: center;
+  border-radius: 18px;
+  background: #7558f6;
+  color: white;
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  transform: rotate(-5deg);
+}
+
+.difficultyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  margin-bottom: 16px;
+}
+
+.difficultyButton {
+  min-height: 105px;
+  padding: 12px;
+  border: 2px solid #e5e7f0;
+  border-radius: 15px;
+  background: #fbfbff;
+  color: #20243a;
+  text-align: left;
+  cursor: pointer;
+}
+
+.difficultyButton strong,
+.difficultyButton small {
+  display: block;
+}
+
+.difficultyButton strong {
+  margin-bottom: 6px;
+  color: #5a3fe3;
+}
+
+.difficultyButton small {
+  color: #747a92;
+  line-height: 1.35;
+}
+
+.difficultySelected {
+  border-color: #7558f6;
+  background: #f0edff;
+  box-shadow: 0 0 0 3px rgba(117, 88, 246, 0.08);
+}
+
+.hintBanner {
+  margin: 14px auto 0;
+  padding: 11px 14px;
+  width: min(560px, 100%);
+  border: 1px solid #f1d57a;
+  border-radius: 13px;
+  background: #fff8d8;
+  color: #695313;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.hintBanner strong {
+  color: #4e3c09;
+}
+
+.lobbyDifficulty {
+  margin: 4px auto 18px;
+  width: fit-content;
+  padding: 7px 11px;
+  border-radius: 999px;
+  background: #f0edff;
+  color: #5a3fe3;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.botTag {
+  color: #7558f6;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+.soloTopButton {
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 10px;
+  padding: 8px 11px;
+  background: rgba(255,255,255,0.12);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.answerFields {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.answerFields input {
+  width: 100%;
+  padding: 15px 16px;
+  border: 2px solid #e5e7f0;
+  border-radius: 14px;
+  background: #fafaff;
+  color: #20243a;
+  font: inherit;
+  outline: none;
+}
+
+.answerFields input:focus {
+  border-color: #7558f6;
+  box-shadow: 0 0 0 4px rgba(117, 88, 246, 0.1);
+}
+
+.answerFields label {
+  text-align: left;
+  color: #565c72;
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.botNotice {
+  margin-top: 10px;
+  color: #747a92;
+  font-size: 0.82rem;
+}
+
+.difficultyPill {
+  padding: 8px 11px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.15);
+  color: white;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.correctFlash {
+  animation: flash 350ms ease;
+}
+
+@keyframes flash {
+  50% { transform: scale(1.01); }
+}
+
+@media (max-width: 620px) {
+  .setupCard {
+    padding: 24px 18px;
+    border-radius: 22px;
+  }
+
+  .difficultyGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .difficultyButton {
+    min-height: auto;
+  }
+}
