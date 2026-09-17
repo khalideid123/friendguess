@@ -15,6 +15,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body>
+        <style>{`[class*="launcherIcon"] { display: none !important; }`}</style>
         {children}
         <SoloModeLauncher />
         <PresenceManager />
