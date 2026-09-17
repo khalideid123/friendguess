@@ -54,11 +54,8 @@
   white-space: nowrap;
 }
 
+/* Rank, avatar, nickname/score, answerer marker, optional host action. */
 .score-player {
-  grid-template-columns: 30px 42px minmax(0, 1fr) 12px;
-}
-
-.score-player:has(.fg-kick-button) {
   grid-template-columns: 30px 42px minmax(0, 1fr) 12px auto;
 }
 
@@ -107,7 +104,7 @@
     font-size: 0.86rem;
   }
 
-  .score-player:has(.fg-kick-button) {
+  .score-player {
     grid-template-columns: 26px 38px minmax(0, 1fr) 10px auto;
     gap: 6px;
   }
