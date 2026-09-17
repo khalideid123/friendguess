@@ -1,0 +1,100 @@
+.score-list {
+  width: 100%;
+  margin: 22px 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 28px rgba(42, 33, 92, 0.08);
+  text-align: left;
+}
+
+.score-row {
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.score-row:last-child {
+  border-bottom: 0;
+}
+
+.score-row:first-child {
+  background: linear-gradient(90deg, rgba(117, 88, 246, 0.09), rgba(117, 88, 246, 0.02));
+}
+
+.score-row > span:first-child {
+  color: #8c91a4;
+  font-size: 0.88rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.score-row > strong {
+  min-width: 0;
+  overflow: hidden;
+  color: #20243a;
+  font-size: 1rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-row > b {
+  min-width: 74px;
+  padding-left: 12px;
+  color: #5143b8;
+  font-size: 0.95rem;
+  font-weight: 900;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.score-player {
+  grid-template-columns: 30px 42px minmax(0, 1fr) 12px;
+}
+
+.score-player > div {
+  min-width: 0;
+}
+
+.score-player > div > strong,
+.score-player > div > small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.score-player > div > small {
+  margin-top: 3px;
+}
+
+.result-card .score-list {
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (max-width: 560px) {
+  .score-row {
+    grid-template-columns: 34px minmax(0, 1fr) max-content;
+    gap: 8px;
+    min-height: 54px;
+    padding: 10px 12px;
+  }
+
+  .score-row > strong {
+    font-size: 0.94rem;
+  }
+
+  .score-row > b {
+    min-width: 62px;
+    padding-left: 6px;
+    font-size: 0.86rem;
+  }
+}
