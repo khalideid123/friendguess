@@ -260,7 +260,9 @@ export default function SoloGame({
                       : "I’ve picked another. What am I thinking?")}
             </div>
             <Milo
-              pose={run.feedback?.kind === "wrong" ? "encourage" : "thinking"}
+              pose="thinking"
+              reaction={run.feedback?.kind}
+              reactionKey={run.feedback?.at}
             />
             <div className="milo-caption">
               <strong>Milo</strong>

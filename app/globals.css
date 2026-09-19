@@ -563,7 +563,6 @@ button {
   width: 100%;
   transform: rotate(4deg);
   filter: drop-shadow(0 15px 9px #66412726);
-  animation: milo-float 5s ease-in-out infinite;
 }
 .orbit {
   position: absolute;
@@ -1094,7 +1093,6 @@ button {
   max-width: 100%;
   margin-top: -4px;
   filter: drop-shadow(0 12px 15px #0004);
-  animation: milo-breathe 4s ease-in-out infinite;
 }
 .milo-caption {
   text-align: center;
@@ -1391,7 +1389,6 @@ button {
 .intro-art > .milo {
   width: 245px;
   filter: drop-shadow(0 18px 25px #0003);
-  animation: milo-float 4s ease-in-out infinite;
 }
 .speech-bubble {
   position: absolute;
@@ -2678,24 +2675,6 @@ button {
 @keyframes ambient-drift {
   to {
     transform: translate(50px, 40px);
-  }
-}
-@keyframes milo-float {
-  0%,
-  100% {
-    transform: translateY(0) rotate(3deg);
-  }
-  50% {
-    transform: translateY(-8px) rotate(1deg);
-  }
-}
-@keyframes milo-breathe {
-  0%,
-  100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-5px);
   }
 }
 @keyframes clue-in {

@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useId, useRef, useState } from "react";
+export { default as Milo } from "./Milo";
 
 const PATHS = {
   arrow: "M5 12h14m-6-6 6 6-6 6",
@@ -51,20 +51,6 @@ export function Icon({ name, size = 20, ...props }) {
     >
       <path d={PATHS[name] || PATHS.sparkles} />
     </svg>
-  );
-}
-export function Milo({ pose = "hello", className = "", priority = false }) {
-  return (
-    <div className={`milo milo-${pose} ${className}`}>
-      <Image
-        src={`./art/milo-${pose}.webp`}
-        alt={`Milo the fox, ${pose === "celebrate" ? "celebrating" : pose === "thinking" ? "thinking" : pose === "encourage" ? "encouraging you" : "waving hello"}`}
-        width={480}
-        height={480}
-        priority={priority}
-        draggable={false}
-      />
-    </div>
   );
 }
 export function Brand({ onClick }) {

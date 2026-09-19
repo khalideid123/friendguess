@@ -42,7 +42,8 @@ This creates isolated QA rooms in the existing Supabase project using its publis
 - `lib/use-room.js`: one owner for polling, room actions, presence and leave cleanup.
 - `lib/supabase.js`: publishable configuration and optional close-guess service with secure RPC fallback.
 - `components/GameUI.js`, `components/AudioProvider.js`: shared game UI and lightweight synthesized audio.
-- `public/art/`: four optimized Milo WebP expression assets, generated for this project.
+- `components/Milo.js`, `components/Milo.module.css`: Milo's layered, reaction-aware animation rig. It pauses offscreen and falls back to static art for reduced motion or asset errors.
+- `public/art/`: four optimized static Milo expressions plus the twelve-part WebP animation rig in `public/art/milo-rig/`.
 
 No DOM observers, injected controls, parallel abandoned solo modes or client-side multiplayer answer matching remain.
 
@@ -56,4 +57,4 @@ Audio starts after user interaction, can be muted, and respects tab visibility. 
 
 ## Assets
 
-Milo's four expressions were created with the built-in image-generation tool as a transparent 2×2 mascot sheet, then cropped and optimized for the game. Brief: an orange fox with cream muzzle and tail tip, violet bandana, in hello, thinking, celebration and encouraging poses. The optimized assets are in `public/art/`. Outfit is locally served under the SIL Open Font License in `public/fonts/OFL.txt`.
+Milo's static expressions and layered animation parts were created with the built-in image-generation tool, then registered, cropped and optimized locally. The rig animates his eyes, ears, head, tail and paws into distinct hello, thinking, close-guess, clue, encouragement and celebration performances. The optimized assets are in `public/art/`. Outfit is locally served under the SIL Open Font License in `public/fonts/OFL.txt`.
