@@ -562,7 +562,6 @@ button {
 .home-milo > .milo {
   width: 100%;
   transform: rotate(4deg);
-  filter: drop-shadow(0 15px 9px #66412726);
 }
 .orbit {
   position: absolute;
@@ -1092,7 +1091,6 @@ button {
   width: 280px;
   max-width: 100%;
   margin-top: -4px;
-  filter: drop-shadow(0 12px 15px #0004);
 }
 .milo-caption {
   text-align: center;
@@ -1388,7 +1386,6 @@ button {
 }
 .intro-art > .milo {
   width: 245px;
-  filter: drop-shadow(0 18px 25px #0003);
 }
 .speech-bubble {
   position: absolute;
@@ -1464,7 +1461,6 @@ button {
 .result-art > .milo {
   width: 100%;
   max-width: 350px;
-  filter: drop-shadow(0 15px 15px #0004);
 }
 .result-art:before {
   content: "";

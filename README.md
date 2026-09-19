@@ -42,10 +42,10 @@ This creates isolated QA rooms in the existing Supabase project using its publis
 - `lib/use-room.js`: one owner for polling, room actions, presence and leave cleanup.
 - `lib/supabase.js`: publishable configuration and optional close-guess service with secure RPC fallback.
 - `components/GameUI.js`, `components/AudioProvider.js`: shared game UI and lightweight synthesized audio.
-- `components/Milo.js`, `components/Milo.module.css`: Milo's layered, reaction-aware animation rig. It pauses offscreen and falls back to static art for reduced motion or asset errors.
-- `public/art/`: four optimized static Milo expressions plus the twelve-part WebP animation rig in `public/art/milo-rig/`.
+- `components/Milo.js`, `lib/milo-animation.js`: Milo's canvas animation, with one animation clock, continuous joint interpolation and localized facial animation. It pauses offscreen and falls back to static art for reduced motion or asset errors.
+- `public/art/`: four optimized static Milo expressions plus nine reusable WebP animation parts in `public/art/milo-rig/`.
 
-No DOM observers, injected controls, parallel abandoned solo modes or client-side multiplayer answer matching remain.
+No injected controls, parallel abandoned solo modes or client-side multiplayer answer matching remain.
 
 ## Multiplayer security
 
